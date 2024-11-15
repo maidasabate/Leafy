@@ -54,9 +54,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDJUq6-EhA-98Mo4hiGZn1-MimDWFPDIzU',
-    appId: '1:1007663543554:android:6a0e96293dfcb10e3afe1b',
+    appId: '1:1007663543554:android:d2fdcbcea1a5b13f3afe1b',
     messagingSenderId: '1007663543554',
     projectId: 'leafyapp-66223',
     storageBucket: 'leafyapp-66223.firebasestorage.app',
   );
+
 }

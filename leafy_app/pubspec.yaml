@@ -27,8 +27,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  assets:
-  - lib/assets/images/whats.png
+  
+
+  fonts:
+    - family: Montserrat-Regular #Nombre de la fuente
+      fonts:
+        - asset:  lib/assets/fonts/Montserrat-Regular.ttf
 
 
   

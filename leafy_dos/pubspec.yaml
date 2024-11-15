@@ -1,0 +1,29 @@
+name: leafy_dos
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flex_color_scheme: ^7.3.1
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - lib/assets/images/whats.png
+  
+  fonts:
+    - family: AfacadFlux-Regular # Nombre de la fuente
+      fonts:
+        - asset: lib/assets/fonts/AfacadFlux-Regular.ttf

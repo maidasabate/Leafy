@@ -40,17 +40,17 @@ class _SplashScreenState extends State<SplashScreen> {
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 500), // Duración de la animación
           opacity: opacity,
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'lib/assets/images/whats.png', // Ruta de la imagen, recuerda la extensión
-                width: 150, // Ajusta el tamaño de la imagen
-                height: 150,
-              ),
-              const SizedBox(height: 20), // Espacio entre el icono y el texto
-              const Text(
-                'WhatsApp',
+            //  Image.asset(
+             //   'lib/assets/images/whats.png', // Ruta de la imagen, recuerda la extensión
+            //    width: 150, // Ajusta el tamaño de la imagen
+               // height: 150,
+            //  ),
+              SizedBox(height: 20), // Espacio entre el icono y el texto
+              Text(
+                'Leafy APP',
                 style: TextStyle(
                   fontFamily: 'AfacadFlux-Regular', // Nombre de la fuente personalizada
                   fontSize: 24, // Tamaño de la fuente

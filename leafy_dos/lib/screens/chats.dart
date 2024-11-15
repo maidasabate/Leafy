@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:leafy_app/components/appbar.dart'; // Importa el tema
+import 'package:leafy_dos/components/appbar.dart'; // Importa el tema
 
 class ChatsScreen extends StatefulWidget {
   const ChatsScreen({super.key});
