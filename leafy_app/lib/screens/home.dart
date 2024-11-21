@@ -1,12 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:leafy_app/components/appbar.dart';
 import 'package:leafy_app/components/formulario.dart';
+import 'package:leafy_app/components/tabs.dart';
 
 class Mantenedor extends StatefulWidget {
   const Mantenedor({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _MantenedorState createState() => _MantenedorState();
 }
 
@@ -139,119 +142,66 @@ class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
 
 
-   @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int currentPage = 0;
-
-  // Dividir las cards en páginas
-  final List<List<String>> cardPages = [
-    List.generate(6, (index) => 'Planta ${index + 1}'), // Primera página
-    List.generate(6, (index) => 'Planta ${index + 7}'), // Segunda página
-    List.generate(6, (index) => 'Planta ${index + 13}'), // Tercera página
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Plantas'),
         centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Dos columnas
-                crossAxisSpacing: 16.0, // Espaciado horizontal
-                mainAxisSpacing: 8.0, // Espaciado vertical
-                childAspectRatio: 3 / 4, // Relación de aspecto para las cards
-              ),
-              itemCount: cardPages[currentPage].length, // Cards de la página actual
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.local_florist,
-                        size: 48,
-                        color: Colors.green,
+          actions: const [
+            Icon(Icons.account_circle),
+            Icon(Icons.settings),
+          ],
+        ),
+    
+        
+        body: ListView(
+          children: [
+            const SizedBox(height: 12.0),
+            SizedBox(
+              height: 250, // Altura de la línea de cards
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(
+                    8,
+                    (index) => Card(
+                      elevation: 4.0,
+                      margin: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 180,
+                            color: const Color.fromARGB(255, 235, 79, 190),
+                            width: 180,
+                            margin: const EdgeInsets.only(left: 8.0),
+                          ),
+                          Container(
+                            width: 180,
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Proyecto 2021 ${index + 1}',
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        cardPages[currentPage][index],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Descripción breve',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    currentPage = (currentPage - 1) % cardPages.length;
-                    if (currentPage < 0) currentPage += cardPages.length; // Asegurar índice positivo
-                  });
-                },
-                icon: const Icon(Icons.arrow_back_ios),
-              ),
-              const SizedBox(width: 8),
-              ...List.generate(
-                cardPages.length,
-                (index) => GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      currentPage = index;
-                    });
-                  },
-                  child: Icon(
-                    Icons.circle,
-                    size: 12,
-                    color: currentPage == index ? Colors.green : Colors.grey,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    currentPage = (currentPage + 1) % cardPages.length;
-                  });
-                },
-                icon: const Icon(Icons.arrow_forward_ios),
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+  
+      
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Acción del botón flotante
-          print('Botón presionado');
+          if (kDebugMode) {
+            print('Botón presionado');
+          }
         },
         child: const Icon(Icons.add),
       ),
