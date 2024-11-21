@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:leafy_app/components/appbar.dart'; // Acuérdate que modular estilos es el nombre MI PROYECTO
+import 'package:leafy_app/components/appbar.dart';
 import 'package:leafy_app/components/formulario.dart';
 
 class Mantenedor extends StatefulWidget {
   const Mantenedor({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _MantenedorState createState() => _MantenedorState();
 }
 
@@ -18,7 +17,6 @@ class _MantenedorState extends State<Mantenedor> {
     const HomeScreen(),
     const SearchScreen(),
     const BlogScreen(),
-    const CallsScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -36,20 +34,16 @@ class _MantenedorState extends State<Mantenedor> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.group),
-            label: 'Profesores',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.search),
-            label: 'Búsqueda',
+            label: 'Buscar Plantas',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.newspaper),
-            label: 'Blog',
+            icon: Icon(Icons.home),
+            label: 'Mis Plantas',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Mensajes',
+            icon: Icon(Icons.group),
+            label: 'Comunidad',
           ),
         ],
       ),
@@ -63,7 +57,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(context), // Usando la función de appbar.dart
+      appBar: buildAppBar(context, 'Buscar Plantas'),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('usuarios').snapshots(),
         builder: (context, snapshot) {
@@ -107,7 +101,7 @@ class HomeScreen extends StatelessWidget {
             context: context,
             backgroundColor: Colors.transparent,
             builder: (context) => FractionallySizedBox(
-              heightFactor: 0.9, // Ajusta la altura si deseas menos del 100%
+              heightFactor: 0.9,
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -125,7 +119,7 @@ class HomeScreen extends StatelessWidget {
                       child: IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () {
-                          Navigator.of(context).pop(); // Cierra el modal
+                          Navigator.of(context).pop();
                         },
                       ),
                     ),
@@ -144,14 +138,122 @@ class HomeScreen extends StatelessWidget {
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
 
+
+   @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int currentPage = 0;
+
+  // Dividir las cards en páginas
+  final List<List<String>> cardPages = [
+    List.generate(6, (index) => 'Planta ${index + 1}'), // Primera página
+    List.generate(6, (index) => 'Planta ${index + 7}'), // Segunda página
+    List.generate(6, (index) => 'Planta ${index + 13}'), // Tercera página
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Búsqueda'),
+        title: const Text('Mis Plantas'),
+        centerTitle: true,
       ),
-      body: const Center(
-        child: Text('Pantalla de búsqueda'),
+      body: Column(
+        children: [
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Dos columnas
+                crossAxisSpacing: 16.0, // Espaciado horizontal
+                mainAxisSpacing: 8.0, // Espaciado vertical
+                childAspectRatio: 3 / 4, // Relación de aspecto para las cards
+              ),
+              itemCount: cardPages[currentPage].length, // Cards de la página actual
+              itemBuilder: (context, index) {
+                return Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.local_florist,
+                        size: 48,
+                        color: Colors.green,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        cardPages[currentPage][index],
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Descripción breve',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    currentPage = (currentPage - 1) % cardPages.length;
+                    if (currentPage < 0) currentPage += cardPages.length; // Asegurar índice positivo
+                  });
+                },
+                icon: const Icon(Icons.arrow_back_ios),
+              ),
+              const SizedBox(width: 8),
+              ...List.generate(
+                cardPages.length,
+                (index) => GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      currentPage = index;
+                    });
+                  },
+                  child: Icon(
+                    Icons.circle,
+                    size: 12,
+                    color: currentPage == index ? Colors.green : Colors.grey,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    currentPage = (currentPage + 1) % cardPages.length;
+                  });
+                },
+                icon: const Icon(Icons.arrow_forward_ios),
+              ),
+            ],
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Acción del botón flotante
+          print('Botón presionado');
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -163,27 +265,9 @@ class BlogScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Blog'),
-      ),
+      appBar: buildAppBar(context, 'Comunidad'),
       body: const Center(
-        child: Text('Pantalla de blog'),
-      ),
-    );
-  }
-}
-
-class CallsScreen extends StatelessWidget {
-  const CallsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mensaje'),
-      ),
-      body: const Center(
-        child: Text('Pantalla de mensajes'),
+        child: Text('Pantalla de comunidad'),
       ),
     );
   }

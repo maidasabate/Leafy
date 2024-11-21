@@ -27,7 +27,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  
+  assets:
+    - lib/assets/images/playstore.png
 
   fonts:
     - family: Montserrat-Regular #Nombre de la fuente
