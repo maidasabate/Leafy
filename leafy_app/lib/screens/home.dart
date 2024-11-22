@@ -145,60 +145,60 @@ class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis Plantas'),
-        centerTitle: true,
-          actions: const [
-            Icon(Icons.account_circle),
-            Icon(Icons.settings),
-          ],
-        ),
+     appBar: buildAppBar(context, 'Mis Plantas'),
     
-        
-        body: ListView(
-          children: [
-            const SizedBox(height: 12.0),
-            SizedBox(
-              height: 250, // Altura de la línea de cards
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(
-                    8,
-                    (index) => Card(
-                      elevation: 4.0,
-                      margin: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Container(
-                            height: 180,
-                            color: const Color.fromARGB(255, 235, 79, 190),
-                            width: 180,
-                            margin: const EdgeInsets.only(left: 8.0),
-                          ),
-                          Container(
-                            width: 180,
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Proyecto 2021 ${index + 1}',
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+        body: Padding(
+  padding: const EdgeInsets.all(12.0),
+  child: GridView.builder(
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2, 
+      crossAxisSpacing: 12.0, 
+      mainAxisSpacing: 12.0, 
+    ),
+    itemCount: 6, 
+    itemBuilder: (context, index) {
+      return SizedBox(
+        width: 80, 
+        height: 40, 
+        child: Card(
+          elevation: 4.0,
+          margin: EdgeInsets.zero,
+          child: Column(
+            children: [
+              Container(
+                height: 130, 
+                width: double.infinity, 
+                child: Image.asset(
+                  'lib/assets/images/Arapanto.jpeg', 
+                  fit: BoxFit.cover, 
                 ),
               ),
-            ),
-          ],
+              Expanded(
+                child: Container(
+                padding: const EdgeInsets.all(4.0),
+                width: double.infinity, 
+                alignment: Alignment.centerLeft, 
+                child: Text(
+                  'Arapanto ${index + 1}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+    ),
+  ),
+),
+
+              ),
+            ],
+          ),
         ),
-  
+      );
+    },
+  ),
+),
+
       
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Acción del botón flotante
           if (kDebugMode) {
             print('Botón presionado');
           }
