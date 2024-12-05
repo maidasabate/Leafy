@@ -1,8 +1,8 @@
-// ignore: unused_import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:leafy_app/components/appbar.dart';
+import 'package:leafy_app/components/appbarbusqueda.dart';
 import 'package:leafy_app/components/formulario.dart';
 
 class Mantenedor extends StatefulWidget {
@@ -54,6 +54,10 @@ class _MantenedorState extends State<Mantenedor> {
   }
 }
 
+
+
+
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -63,33 +67,41 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _searchText = ''; // Texto del buscador
+  String _searchText = '';
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(context, 'Buscar Plantas'),
+      appBar: buildAppBarbusqueda(
+        context,
+        'Buscar Plantas',
+        isSearching: _isSearching,
+        searchController: _searchController,
+        onSearchToggle: () {
+          setState(() {
+            _isSearching = !_isSearching;
+            if (!_isSearching) {
+              _searchController.clear();
+              _searchText = '';
+            }
+          });
+        },
+        onSearchTextChanged: (value) {
+          setState(() {
+            _searchText = value.toLowerCase();
+          });
+        },
+      ),
       body: Column(
         children: [
-          // Campo de búsqueda
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              onChanged: (value) {
-                setState(() {
-                  _searchText = value.toLowerCase(); // Actualiza el texto del buscador
-                });
-              },
-              decoration: InputDecoration(
-                hintText: 'Buscar plantasp...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-          ),
-          // Stream de datos y lista filtrada
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('usuarios').snapshots(),
@@ -132,6 +144,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text('${usuario['telefono']}'),
+                      trailing: const Icon(
+                        Icons.yard, 
+                        color: Colors.green, 
+                        size: 30,
+                      ),
                     );
                   },
                 );
@@ -182,195 +199,75 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 
+
+
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(context, 'Mis Plantas'),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12.0,
-            mainAxisSpacing: 12.0,
-          ),
-          itemCount: 6,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailScreen(
-                      plantName: 'Arapanto ${index + 1}',
-                      imagePath: 'lib/assets/images/Arapanto.jpeg',
-                    ),
-                  ),
-                );
-              },
-              child: SizedBox(
-                width: 80,
-                height: 40,
-                child: Card(
-                  elevation: 4.0,
-                  margin: EdgeInsets.zero,
-                  child: Column(
-                    children: [
-                      // ignore: sized_box_for_whitespace
-                      Container(
-                        height: 130,
-                        width: double.infinity,
-                        child: Image.asset(
-                          'lib/assets/images/Arapanto.jpeg',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(4.0),
-                          width: double.infinity,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Arapanto ${index + 1}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+     appBar: buildAppBar(context, 'Mis Plantas'),
+    
+        body: Padding(
+  padding: const EdgeInsets.all(12.0),
+  child: GridView.builder(
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2, 
+      crossAxisSpacing: 12.0, 
+      mainAxisSpacing: 12.0, 
+    ),
+    itemCount: 6, 
+    itemBuilder: (context, index) {
+      return SizedBox(
+        width: 80, 
+        height: 40, 
+        child: Card(
+          elevation: 4.0,
+          margin: EdgeInsets.zero,
+          child: Column(
+            children: [
+              // ignore: sized_box_for_whitespace
+              Container(
+                height: 130, 
+                width: double.infinity, 
+                child: Image.asset(
+                  'lib/assets/images/Arapanto.jpeg', 
+                  fit: BoxFit.cover, 
                 ),
               ),
-            );
-          },
+              Expanded(
+                child: Container(
+                padding: const EdgeInsets.all(4.0),
+                width: double.infinity, 
+                alignment: Alignment.centerLeft, 
+                child: Text(
+                  'Arapanto ${index + 1}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+    ),
+  ),
+),
+
+              ),
+            ],
+          ),
         ),
-      ),
+      );
+    },
+  ),
+),
+
+      
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showModalBottomSheet(
-            isScrollControlled: true,
-            context: context,
-            backgroundColor: Colors.transparent,
-            builder: (context) => FractionallySizedBox(
-              heightFactor: 0.9,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: Stack(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: FormularioScreen(),
-                    ),
-                    Positioned(
-                      top: 16,
-                      right: 16,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
+          if (kDebugMode) {
+            print('Botón presionado');
+          }
         },
         child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
-
-class DetailScreen extends StatelessWidget {
-  final String plantName;
-  final String imagePath;
-
-  const DetailScreen({
-    required this.plantName,
-    required this.imagePath,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(plantName),
-      ),
-      body: Column(
-        children: [
-          // Imagen estática debajo del Navbar
-          // ignore: sized_box_for_whitespace
-          Container(
-            width: double.infinity,
-            height: 200,
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.broken_image, size: 50),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 20),
-          // Contenido principal
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    plantName,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          // ignore: prefer_const_constructors
-                          title: Text('Información'),
-                          content: Text('Más detalles sobre $plantName.'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('Cerrar'),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.blue,
-                    ),
-                    child: const Text(
-                      '+ AGREGAR PLANTA A BIBLIOTECA',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -387,6 +284,7 @@ class BlogScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 12.0),
           Container(
+            // Usuario
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
@@ -405,20 +303,19 @@ class BlogScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(
-                    width: 12.0), // Espacio entre la imagen y el texto
-                // Texto al lado
+                    width: 12.0), 
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Nombre del Usuario',
+                      'Maida Villarroel',
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      'Descripción breve',
+                      'Fertilizando con cáscara de huevo',
                       style: TextStyle(
                         fontSize: 14.0,
                         color: Colors.grey[600],
@@ -429,12 +326,154 @@ class BlogScreen extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 12.0),
+          Container(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              width: double.infinity,
+              // Publicacion
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                      'Publicado 04/07/2024  -  hace 20 minutos', // Informacion post
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Color.fromARGB(255, 120, 120, 120),
+                      )),
+                  const SizedBox(height: 4.0),
+                  const Text(
+                      // Post
+                      'Este tip me lo dio hace mucho tiempo mi mamá y siempre me ha funcionado genial a ustedes que tal les va con este método?',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color.fromARGB(255, 102, 102, 102),
+                      )),
+                  const SizedBox(height: 10.0),
+                  Container(
+                    // Imagen
+                    height: 350.0,
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('lib/assets/images/fertilizante.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  )
+                ],
+              )),
+          const SizedBox(height: 12.0),
+          Container(
+            // Likes y comentarios
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            width: double.infinity,
+            child: const Row(
+              // Likes y comentarios
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Icon(
+                  // Likes
+                  Icons.favorite, // Icono de corazón
+                  color: Color.fromARGB(255, 0, 0, 0),
+                  fill: 0,
+                  size: 24,
+                ),
+                SizedBox(width: 8.0),
+                Text(
+                  // Cantidad de likes
+                  '10',
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(width: 16.0),
+                Icon(
+                  // Icono comentarios
+                  Icons.comment, // Icono de comentario
+                  color: Color.fromARGB(255, 0, 0, 0),
+                  size: 24.0, // Tamaño del icono
+                ),
+                SizedBox(width: 8.0),
+                Text(
+                  // Cantidad de comentarios
+                  '9',
+                  style: TextStyle(
+                    fontSize: 14.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            // Usuario 1 - comentario
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Imagen circular
+                Container(
+                  width: 24.0,
+                  height: 24.0,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: AssetImage('lib/assets/images/usuario.jpeg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                    width: 12.0), // Espacio entre la imagen y el texto
+                // Texto al lado
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Publicado  - hace 10 minutos',
+                      style: TextStyle(
+                          fontSize: 10,
+                          color: Color.fromARGB(255, 102, 102, 102)),
+                    ),
+                    Text(
+                      'JM Martinez',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Container(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              width: double.infinity,
+              child: const Column(
+                // Comentario
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                      'Tienes que machacarlos y hervirlos y luego riegas con ellos!! es mucho más fácil que la planta absorba los nutrientes!!',
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 102, 102, 102))),
+                  Text('Responder     Ver más',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ))
+                ],
+              )),
         ],
       ),
     );
   }
 }
-
 
 
 

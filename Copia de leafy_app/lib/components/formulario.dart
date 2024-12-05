@@ -61,16 +61,16 @@ class _FormularioScreenState extends State<FormularioScreen> {
               children: [
                 const SizedBox(height: 32),
                 const Text(
-                  'Añadir Planta',
+                  'Agregar nueva planta',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 32),
                 TextFormField(
                   controller: _nombreController,
-                  decoration: const InputDecoration(labelText: 'Nombre planta'),
+                  decoration: const InputDecoration(labelText: 'Nombre'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Por favor, ingrese el nombre de la planta';
+                      return 'Por favor, ingrese el nombre';
                     }
                     return null;
                   },
@@ -85,7 +85,7 @@ class _FormularioScreenState extends State<FormularioScreen> {
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Agregar'),
+                    child: const Text('REGISTRAR'),
                   ),
                 ),
               ],

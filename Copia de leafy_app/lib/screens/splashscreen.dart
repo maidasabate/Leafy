@@ -43,13 +43,11 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-        
-          Image.asset(
-          'lib/assets/images/playstore.png', // Ruta de la imagen, recuerda la extensión
-            width: 150, // Ajusta el tamaño de la imagen
-           height: 150,
-          ),
-             
+              Image.asset(
+                'lib/assets/images/playstore.png',
+                width: 150, 
+                height: 150,
+              ),
               const SizedBox(height: 20), // Espacio entre el icono y el texto
               const Text(
                 'Leafy APP',
