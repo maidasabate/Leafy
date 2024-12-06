@@ -1,3 +1,6 @@
+// ignore_for_file: avoid_print
+
+// ignore: unused_import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -198,75 +201,277 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-
-
-
-class SearchScreen extends StatelessWidget {
+class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
 
+  @override
+  State<SearchScreen> createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  final PageController _pageController = PageController(); // Controlador de páginas
+  int _currentPage = 0; // Página actual
+  final TextEditingController _searchController = TextEditingController();
+  List<String> allPlants = [
+    'Arapanto',
+    'Cactus',
+    'Helecho',
+    'Rosa',
+    'Tulipán',
+    'Lavanda',
+  ]; // Plantas disponibles
+  List<String> filteredPlants = []; // Plantas filtradas para agregar
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-     appBar: buildAppBar(context, 'Mis Plantas'),
-    
-        body: Padding(
-  padding: const EdgeInsets.all(12.0),
-  child: GridView.builder(
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2, 
-      crossAxisSpacing: 12.0, 
-      mainAxisSpacing: 12.0, 
-    ),
-    itemCount: 6, 
-    itemBuilder: (context, index) {
-      return SizedBox(
-        width: 80, 
-        height: 40, 
-        child: Card(
-          elevation: 4.0,
-          margin: EdgeInsets.zero,
+  void initState() {
+    super.initState();
+    filteredPlants = allPlants; // Inicialmente muestra todas
+  }
+
+  void _addPlant(String plantName) async {
+    // Agregar planta a Firestore y navegar a la última página
+    await FirebaseFirestore.instance.collection('plantas').add({'nombre': plantName});
+    final snapshot = await FirebaseFirestore.instance.collection('plantas').get();
+    final totalPlants = snapshot.docs.length;
+    final totalPages = (totalPlants / 6).ceil();
+    _pageController.animateToPage(
+      totalPages - 1,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _deletePlant(String docId) async {
+    // Eliminar planta de Firestore
+    await FirebaseFirestore.instance.collection('plantas').doc(docId).delete();
+    final snapshot = await FirebaseFirestore.instance.collection('plantas').get();
+    final totalPlants = snapshot.docs.length;
+    final totalPages = (totalPlants / 6).ceil();
+
+    // Ajustar la página actual si se elimina la última tarjeta de la última página
+    if (_currentPage >= totalPages) {
+      _pageController.animateToPage(
+        totalPages - 1 < 0 ? 0 : totalPages - 1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _showAddPlantBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.9,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
           child: Column(
             children: [
-              // ignore: sized_box_for_whitespace
-              Container(
-                height: 130, 
-                width: double.infinity, 
-                child: Image.asset(
-                  'lib/assets/images/Arapanto.jpeg', 
-                  fit: BoxFit.cover, 
+              const SizedBox(height: 16),
+              const Text(
+                'Agregar Planta',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    setState(() {
+                      filteredPlants = allPlants
+                          .where((plant) =>
+                              plant.toLowerCase().contains(value.toLowerCase()))
+                          .toList();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Buscar Planta',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
                 ),
               ),
               Expanded(
-                child: Container(
-                padding: const EdgeInsets.all(4.0),
-                width: double.infinity, 
-                alignment: Alignment.centerLeft, 
-                child: Text(
-                  'Arapanto ${index + 1}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-    ),
-  ),
-),
-
+                child: ListView.builder(
+                  itemCount: filteredPlants.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(filteredPlants[index]),
+                      trailing: const Icon(Icons.add, color: Colors.green),
+                      onTap: () {
+                        _addPlant(filteredPlants[index]);
+                        Navigator.of(context).pop();
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),
         ),
-      );
-    },
-  ),
-),
+      ),
+    );
+  }
 
-      
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (kDebugMode) {
-            print('Botón presionado');
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mis Plantas'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('plantas').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return Center(
+                child: Text('Error: ${snapshot.error.toString()}'));
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No hay plantas disponibles.'));
+          }
+
+          final plantasDocs = snapshot.data!.docs;
+          final int pages = (plantasDocs.length / 6).ceil(); // Número de páginas
+
+          return Stack(
+            children: [
+              PageView.builder(
+                controller: _pageController,
+                itemCount: pages,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                itemBuilder: (context, pageIndex) {
+                  // Calcula el rango de tarjetas para esta página
+                  final startIndex = pageIndex * 6;
+                  final endIndex = (startIndex + 6 > plantasDocs.length)
+                      ? plantasDocs.length
+                      : startIndex + 6;
+                  final plantasPage =
+                      plantasDocs.sublist(startIndex, endIndex);
+
+                  return Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12.0,
+                        mainAxisSpacing: 12.0,
+                      ),
+                      itemCount: plantasPage.length,
+                      itemBuilder: (context, index) {
+                        final plantData = plantasPage[index];
+                        final plantName =
+                            plantData['nombre'] ?? 'Sin nombre';
+
+                        return Card(
+                          elevation: 4.0,
+                          margin: EdgeInsets.zero,
+                          child: Column(
+                            children: [
+                              // ignore: sized_box_for_whitespace
+                              Container(
+                                height: 130,
+                                width: double.infinity,
+                                child: Image.asset(
+                                  'lib/assets/images/Arapanto.jpeg',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        plantName,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    PopupMenuButton<String>(
+                                      onSelected: (value) {
+                                        if (value == 'Eliminar') {
+                                          _deletePlant(plantData.id);
+                                        }
+                                      },
+                                      itemBuilder: (context) => [
+                                        const PopupMenuItem(
+                                          value: 'Editar',
+                                          child: Text('Editar'),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'Eliminar',
+                                          child: Text('Eliminar'),
+                                        ),
+                                      ],
+                                      icon: const Icon(Icons.more_vert),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+              Positioned(
+                bottom: 70,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    pages,
+                    (index) => GestureDetector(
+                      onTap: () {
+                        _pageController.animateToPage(
+                          index,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                        width: _currentPage == index ? 10.0 : 6.0,
+                        height: _currentPage == index ? 10.0 : 6.0,
+                        decoration: BoxDecoration(
+                          color: _currentPage == index
+                              ? Colors.teal
+                              : Colors.teal.shade200,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddPlantBottomSheet(context),
         child: const Icon(Icons.add),
       ),
     );

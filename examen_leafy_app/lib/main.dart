@@ -4,6 +4,9 @@ import 'package:leafy_app/screens/home.dart';
 import 'package:leafy_app/screens/splashscreen.dart';
 import 'package:leafy_app/theme/theme.dart';
 import 'firebase_options.dart';
+// ignore: unused_import
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
